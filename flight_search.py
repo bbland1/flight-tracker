@@ -1,7 +1,6 @@
 import requests
 from dotenv import dotenv_values
-from datetime import datetime
-
+from datetime import datetime, timedelta
 from flight_data import FlightData
 
 config = dotenv_values(".env")
@@ -16,8 +15,8 @@ class FlightSearch:
             "Content-Encoding": "gzip"
         }
         self.today = datetime.now()
-        self.tomorrow = self.today + datetime.timedelta(day=1)
-        self.months_6_away = self.today + datetime.timedelta(day=6 * 30)
+        self.tomorrow = self.today + timedelta(days=1)
+        self.months_6_away = self.today + timedelta(days=6 * 30)
 
     def find_iata(self, city: str):
         self.find_iata_params = {
@@ -41,7 +40,7 @@ class FlightSearch:
             "curr": "USD",
             # minimum amount of nights staying in the fly_to location
             "nights_in_dst_from": mini_stay_time,
-             # maximum amount of nights staying in the fly_to location
+            # maximum amount of nights staying in the fly_to location
             "nights_in_dst_to": max_stay_time,
             # every flight is round trip
             "flight_type": "round",
@@ -62,12 +61,18 @@ class FlightSearch:
 
         # because ofo how the search is set up the results returned are specified to be able to be used with this structure of search and information
         self.flight_data = FlightData(
-            price = self.data["price"],
-            origin_city = self.data["route"][0]["cityFrom"],
-            origin_airport = self.data["route"][0]["flyFrom"],
-            destination_city = self.data["route"][0]["cityTo"],
-            destination_airport = self.data["route"][0]["flyTo"],
-            out_date = self.data["route"][0]["local_departure"].split("T")[0],
-            return_date = self.data["route"][1]["local_departure"].split("T")[0])
+            price=self.data["price"],
+            origin_city=self.data["route"][0]["cityFrom"],
+            origin_airport=self.data["route"][0]["flyFrom"],
+            destination_city=self.data["route"][0]["cityTo"],
+            destination_airport=self.data["route"][0]["flyTo"],
+            out_date=self.data["route"][0]["local_departure"].split("T")[0],
+            return_date=self.data["route"][1]["local_departure"].split("T")[0])
+
+
+        print(
+            f"Flight from {self.flight_data.origin_city} to {self.flight_data.destination_city}: ${self.flight_data.price}")
+
+        return self.flight_data.price
 
     # This class is responsible for talking to the Flight Search API.
